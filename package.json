@@ -3,6 +3,8 @@
   "displayName": "盯盘助手",
   "description": "股票监控插件、盯盘助手。这是一个 VS Code 插件，用于在侧边栏展示股票行情信息，并提供状态栏实时监控功能。",
   "version": "0.0.1",
+  "publisher": "kudsu",
+  "author": "千山慕雪",
   "engines": {
     "vscode": "^1.97.0"
   },
