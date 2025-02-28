@@ -1,71 +1,78 @@
-# stocksidebar README
+# 股票监控插件 (ly-stocksidebar)
 
-This is the README for your extension "stocksidebar". After writing up a brief description, we recommend including the following sections.
+## 简介
 
-## Features
+股票监控插件是一个用于 Visual Studio Code 的扩展，可以帮助用户实时监控股票行情。插件提供了股票列表视图，支持添加、删除、移动股票，并且可以将股票添加到状态栏以便随时查看。
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## 功能特性
 
-For example if there is an image subfolder under your extension project workspace:
+- **实时股票数据**：从 sina 财经获取实时股票数据。
+- **股票列表视图**：在 VSCode 的侧边栏中显示股票列表。
+- **添加股票**：通过搜索功能添加自选股票。
+- **删除股票**：从股票列表中删除股票。
+- **移动股票**：上移、下移、置顶、置底股票。
+- **状态栏显示**：将股票添加到状态栏以便随时查看。
 
-\!\[feature X\]\(images/feature-x.png\)
+## 安装
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. 打开 Visual Studio Code。
+2. 进入扩展市场（Extensions Marketplace）。
+3. 搜索 `ly-stocksidebar`。
+4. 点击安装按钮进行安装。
 
-## Requirements
+## 使用方法
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### 添加股票
 
-## Extension Settings
+1. 打开股票监控视图（`股票监控` 侧边栏）。
+2. 点击 `添加股票` 按钮。
+3. 在弹出的快速选择框中输入股票代码或名称进行搜索。
+4. 选择要添加的股票并确认。
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### 删除股票
 
-For example:
+1. 打开股票监控视图（`股票监控` 侧边栏）。
+2. 右键点击要删除的股票。
+3. 选择 `删除股票`。
 
-This extension contributes the following settings:
+### 移动股票
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+1. 打开股票监控视图（`股票监控` 侧边栏）。
+2. 右键点击要移动的股票。
+3. 选择 `上移股票`、`下移股票`、`置顶股票` 或 `置底股票`。
 
-## Known Issues
+### 添加到状态栏
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+1. 打开股票监控视图（`股票监控` 侧边栏）。
+2. 右键点击要添加到状态栏的股票。
+3. 选择 `添加到状态栏`。
 
-## Release Notes
+### 从状态栏删除
 
-Users appreciate release notes as you update your extension.
+1. 打开股票监控视图（`股票监控` 侧边栏）。
+2. 右键点击要从状态栏删除的股票。
+3. 选择 `从状态栏删除`。
 
-### 1.0.0
+## 配置选项
 
-Initial release of ...
+在 VSCode 的设置中，你可以配置以下选项：
 
-### 1.0.1
+- **ly-stocksidebar.fallColor**：下跌时的颜色，默认为 `NavajoWhite`。
+- **ly-stocksidebar.riseColor**：上涨时的颜色，默认为 `LightBlue`。
+- **ly-stocksidebar.stocks**：自选股票代码列表，默认为空数组。W
+- **ly-stocksidebar.statusBarStock**：显示在状态栏的股票代码列表，默认为空数组。
 
-Fixed issue #.
 
-### 1.1.0
+## 注意事项
 
-Added features X, Y, and Z.
+- 插件依赖新浪财经接口获取股票数据，请确保网络畅通。
+- 交易时间段为周一至周五的 9:30 - 11:30 和 13:00 - 15:00，非交易时间段数据不会自动刷新。
 
----
 
-## Following extension guidelines
+## 贡献
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+欢迎贡献代码和报告问题！请访问 [GitHub 仓库](https://github.com/ly2351/ly.stocksidebar.git)。
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+## 许可证
 
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+本项目采用 [MIT 许可证](LICENSE)。

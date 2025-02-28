@@ -1,7 +1,7 @@
 {
   "name": "ly-stocksidebar",
-  "displayName": "ly-stocksidebar",
-  "description": "股票监控插件",
+  "displayName": "盯盘助手",
+  "description": "股票监控插件、盯盘助手。这是一个 VS Code 插件，用于在侧边栏展示股票行情信息，并提供状态栏实时监控功能。",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.97.0"
@@ -11,6 +11,20 @@
   ],
   "activationEvents": [
     "*"
+  ],
+  "keywords": [
+    "stock",
+    "fund",
+    "stocksidebar",
+    "ly",
+    "stockhelper",
+    "ly-stocksidebar",
+    "股票",
+    "基金",
+    "盯盘助手",
+    "同花顺",
+    "东方财富",
+    "天天基金"
   ],
   "main": "./out/extension.js",
   "contributes": {
