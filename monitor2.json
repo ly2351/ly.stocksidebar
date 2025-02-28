@@ -1,0 +1,18 @@
+{
+  "leek-fund.fallColor": "NavajoWhite",
+  "leek-fund.riseColor": "LightBlue",
+  "leek-fund.stocks": [
+    "sz300059",
+    "sz300339",
+    "sz300347",
+    "sz301091",
+    "sh600702",
+    "sz300552",
+    "sz000007"
+  ],
+  "leek-fund.statusBarStock": [
+    "sz300059",
+    "sz300339",
+    "sz300826"
+  ]
+}

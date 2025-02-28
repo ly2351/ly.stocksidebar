@@ -1,0 +1,170 @@
+{
+  "name": "ly-stocksidebar",
+  "displayName": "ly-stocksidebar",
+  "description": "股票监控插件",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.97.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ly-stocksidebar",
+          "title": "股票监控",
+          "icon": "resources/stock.svg"
+        }
+      ]
+    },
+    "views": {
+      "ly-stocksidebar": [
+        {
+          "id": "stockView",
+          "name": "股票列表"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ly-stocksidebar.refresh",
+        "title": "刷新股票数据"
+      },
+      {
+        "command": "ly-stocksidebar.addStock",
+        "title": "添加股票"
+      },
+      {
+        "command": "ly-stocksidebar.deleteStock",
+        "title": "删除股票"
+      },
+      {
+        "command": "ly-stocksidebar.addToStatusBar",
+        "title": "添加到状态栏"
+      },
+      {
+        "command": "ly-stocksidebar.parentRefresh",
+        "title": "刷新父项股票列表"
+      },
+      {
+        "command": "ly-stocksidebar.parentAddStock",
+        "title": "在父项添加股票"
+      },
+      {
+        "command": "ly-stocksidebar.moveUp",
+        "title": "上移股票"
+      },
+      {
+        "command": "ly-stocksidebar.moveDown",
+        "title": "下移股票"
+      },
+      {
+        "command": "ly-stocksidebar.moveToTop",
+        "title": "置顶股票"
+      },
+      {
+        "command": "ly-stocksidebar.moveToBottom",
+        "title": "置底股票"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "ly-stocksidebar.parentRefresh",
+          "when": "view == stockView && viewItem == stockParent",
+          "group": "navigation"
+        },
+        {
+          "command": "ly-stocksidebar.parentAddStock",
+          "when": "view == stockView && viewItem == stockParent",
+          "group": "navigation"
+        },
+        {
+          "command": "ly-stocksidebar.moveUp",
+          "when": "view == stockView && viewItem != stockParent",
+          "group": "navigation"
+        },
+        {
+          "command": "ly-stocksidebar.moveDown",
+          "when": "view == stockView && viewItem != stockParent",
+          "group": "navigation"
+        },
+        {
+          "command": "ly-stocksidebar.moveToTop",
+          "when": "view == stockView && viewItem != stockParent",
+          "group": "navigation2"
+        },
+        {
+          "command": "ly-stocksidebar.moveToBottom",
+          "when": "view == stockView && viewItem != stockParent",
+          "group": "navigation2"
+        },
+        {
+          "command": "ly-stocksidebar.deleteStock",
+          "when": "view == stockView && viewItem != stockParent",
+          "group": "navigation3"
+        },
+        {
+          "command": "ly-stocksidebar.addToStatusBar",
+          "when": "view == stockView && viewItem!= stockParent",
+          "group": "navigation3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ly-stocksidebar",
+      "properties": {
+        "ly-stocksidebar.fallColor": {
+          "type": "string",
+          "default": "NavajoWhite",
+          "description": "下跌时的颜色"
+        },
+        "ly-stocksidebar.riseColor": {
+          "type": "string",
+          "default": "LightBlue",
+          "description": "上涨时的颜色"
+        },
+        "ly-stocksidebar.stocks": {
+          "type": "array",
+          "default": [],
+          "description": "自选股票代码列表"
+        },
+        "ly-stocksidebar.statusBarStock": {
+          "type": "array",
+          "default": [],
+          "description": "显示在状态栏的股票"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.8",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.97.0",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.11.1",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "iconv-lite": "^0.6.3",
+    "vscode": "^1.1.37"
+  }
+}
