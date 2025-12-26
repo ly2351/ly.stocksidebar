@@ -6,7 +6,7 @@ import * as axios from "axios";
 interface Stock {
     name: string;
     code: string;
-    updown: number;   // 涨跌额
+    updown: number;   // 涨跌额。
     percent: number;  // 涨跌幅（%）
     cur: number;      // 当前价
     high: number;     // 最高价
