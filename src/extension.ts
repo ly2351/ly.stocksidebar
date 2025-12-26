@@ -6,7 +6,7 @@ import * as axios from "axios";
 interface Stock {
     name: string;
     code: string;
-    updown: number;   // 涨跌额。
+    updown: number;   // 涨跌额
     percent: number;  // 涨跌幅（%）
     cur: number;      // 当前价
     high: number;     // 最高价
@@ -15,6 +15,18 @@ interface Stock {
     yestclose: number; // 昨收价
     amount: number;   // 成交额
     time: string;     // 更新时间
+}
+
+interface StockBase {
+    代码: string;
+    名称: string;
+}
+
+interface StockIndexItem {
+    code: string;
+    name: string;
+    codeLower: string;
+    nameLower: string;
 }
 
 ///region 注册命令
@@ -284,60 +296,106 @@ class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'parent' 
     }
 
     // 添加股票
-    async addStock(): Promise<void> {
+    async addStock(this: any): Promise<void> {
         try {
-            // 读取全量股票数据
+            // 1. 读取股票基础数据
             const allBasePath = path.join(__dirname, "..", "allbase.json");
-            const allStocks: Array<{ 代码: string, 名称: string }> = JSON.parse(fs.readFileSync(allBasePath, "utf-8"));
+            const allStocks: StockBase[] = JSON.parse(
+                fs.readFileSync(allBasePath, "utf-8")
+            );
 
-            // 创建快速选择框
-            const picker = vscode.window.createQuickPick();
-            picker.placeholder = "请输入关键词查询，如：300059 或 东方财富";
+            // 2. 构建搜索索引（只做一次）
+            const stockIndex: StockIndexItem[] = allStocks.map(s => ({
+                code: s.代码,
+                name: s.名称,
+                codeLower: s.代码.toLowerCase(),
+                nameLower: s.名称.toLowerCase(),
+            }));
 
-            // 设置搜索逻辑
-            picker.onDidChangeValue(async (value) => {
-                if (value) {
-                    console.log("搜索值:", value);
-                    // 新增输入验证：包含中文或数字时才搜索
-                    const hasValidInput = /[\u4e00-\u9fa5\d]/.test(value);
-                    if (!hasValidInput) return;
-                    picker.items = allStocks
-                        .filter(stock => {
-                            const codeMatch = stock.代码.toLowerCase().includes(value.toLowerCase());
-                            const nameMatch = stock.名称.toLowerCase().includes(value.toLowerCase());
-                            console.log(`匹配: ${stock.代码} - ${stock.名称}, 代码匹配: ${codeMatch}, 名称匹配: ${nameMatch}`);
-                            return codeMatch || nameMatch;
-                        })
-                        .slice(0, 10)
-                        .map(stock => ({
-                            label: stock.代码,
-                            description: "|  " + stock.名称,
-                        }));
+            // 3. 创建 QuickPick
+            const picker = vscode.window.createQuickPick<vscode.QuickPickItem>();
+            picker.placeholder = "请输入股票代码或名称，如：300059 / 东方财富";
+            picker.matchOnDescription = false;
+            picker.matchOnDetail = false;
+
+            let searchTimer: NodeJS.Timeout | undefined;
+
+            // 4. 输入监听（防抖）
+            picker.onDidChangeValue((value) => {
+                if (searchTimer) {
+                    clearTimeout(searchTimer);
                 }
-            });
 
-            // 处理选择结果
-            picker.onDidAccept(async () => {
-                if (picker.selectedItems[0]) {
-                    console.log("用户选择:", picker.selectedItems[0]);
-                    let selectedCode = picker.selectedItems[0].label;
-                    picker.hide();
-                    selectedCode = this.normalizeStockCode(selectedCode);
-                    const stocks = await this.fetchStockDataByCode(selectedCode);
-                    // 使用选择的股票代码继续原有流程
-                    if (stocks) {
-                        this.stocks.push(stocks[0]);
-                        this.saveStocks(); // 保存更新后的股票列表到 settings.json
-                        this._onDidChangeTreeData.fire(undefined);
+                searchTimer = setTimeout(() => {
+                    const keyword = value.trim();
+                    if (keyword.length < 2) {
+                        picker.items = [];
+                        return;
                     }
+
+                    const results = this.searchStocks(keyword, stockIndex)
+                        .slice(0, 10)
+                        .map((stock: StockIndexItem) => ({
+                            label: stock.code,
+                            description: `| ${stock.name}`,
+                        }));
+
+                    picker.items = results;
+                }, 200);
+            });
+
+            // 5. 处理选择结果
+            picker.onDidAccept(async () => {
+                const selected = picker.selectedItems[0];
+                if (!selected) return;
+
+                picker.hide();
+
+                let selectedCode = this.normalizeStockCode(selected.label);
+                const stocks = await this.fetchStockDataByCode(selectedCode);
+
+                if (stocks && stocks.length > 0) {
+                    this.stocks.push(stocks[0]);
+                    this.saveStocks();
+                    this._onDidChangeTreeData.fire(undefined);
                 }
             });
+
+            picker.onDidHide(() => picker.dispose());
 
             picker.show();
         } catch (error) {
-            vscode.window.showErrorMessage("加载股票数据失败，请检查allbase.json文件");
-            console.error("加载股票数据失败:", error);
+            vscode.window.showErrorMessage("加载股票数据失败，请检查 allbase.json");
+            console.error(error);
         }
+    }
+
+    searchStocks(
+        keyword: string,
+        stocks: {
+            code: string;
+            name: string;
+            codeLower: string;
+            nameLower: string;
+        }[]
+    ) {
+        const kw = keyword.toLowerCase();
+
+        // 纯数字：优先匹配股票代码（startsWith 更精准）
+        if (/^\d+$/.test(kw)) {
+            return stocks.filter(s => s.codeLower.startsWith(kw));
+        }
+
+        // 包含中文：匹配名称
+        if (/[\u4e00-\u9fa5]/.test(kw)) {
+            return stocks.filter(s => s.nameLower.includes(kw));
+        }
+
+        // 兜底：代码或名称包含
+        return stocks.filter(s =>
+            s.codeLower.includes(kw) ||
+            s.nameLower.includes(kw)
+        );
     }
 
     /// region 上移、下移、置顶、置底、删除、保存
@@ -436,11 +494,11 @@ class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'parent' 
     async addToStatusBar(stock: Stock): Promise<void> {
         // const stockInfo = `${stock.name} (${stock.code})`;
         // vscode.window.setStatusBarMessage(`📈 ${stockInfo}`, 5000);
-    
+
         // 更新 settings.json 中的状态栏股票
         const config = vscode.workspace.getConfiguration('ly-stocksidebar');
         const statusBarStocks = config.get<string[]>('statusBarStock', []);
-    
+
         // 检查是否已经存在于状态栏股票中
         if (!statusBarStocks.includes(stock.code)) {
             statusBarStocks.push(stock.code);
@@ -451,7 +509,7 @@ class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'parent' 
                 .catch((error) => {
                     console.error("❌ 添加状态栏股票到 settings.json 失败:", error);
                 });
-    
+
             // 重新加载 stocks 和 statusBarStocks
             await this.loadStocks();
         } else {
