@@ -22,6 +22,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     let refreshInterval: NodeJS.Timeout | undefined;
 
+    const getConfig = () => {
+        const config = vscode.workspace.getConfiguration('ly-stocksidebar');
+        return {
+            enableAutoRefresh: config.get<boolean>('enableAutoRefresh', true),
+            refreshInterval: config.get<number>('refreshInterval', 5000)
+        };
+    };
+
     const isMarketOpen = () => {
         const now = new Date();
         const day = now.getDay();
@@ -31,18 +39,27 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     const toggleRefreshInterval = () => {
-        if (isMarketOpen() && !refreshInterval) {
-            refreshInterval = setInterval(() => stockProvider.refresh(), 5000);
-            console.log("定时器已启用，每5秒刷新一次股票数据。");
-        } else if (!isMarketOpen() && refreshInterval) {
+        const { enableAutoRefresh, refreshInterval: interval } = getConfig();
+        if (enableAutoRefresh && isMarketOpen() && !refreshInterval) {
+            refreshInterval = setInterval(() => stockProvider.refresh(), interval);
+            console.log(`定时器已启用，每${interval}ms刷新一次股票数据。`);
+        } else if ((!enableAutoRefresh || !isMarketOpen()) && refreshInterval) {
             clearInterval(refreshInterval);
             refreshInterval = undefined;
-            console.log("定时器已禁用，当前不在交易时间内。");
+            console.log("定时器已禁用。");
         }
     };
 
     toggleRefreshInterval();
     setInterval(toggleRefreshInterval, 60000);
+
+    // 监听配置变化
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('ly-stocksidebar.enableAutoRefresh') || e.affectsConfiguration('ly-stocksidebar.refreshInterval')) {
+            toggleRefreshInterval();
+        }
+    }));
+
     console.log("股票监控插件已激活！");
 }
 

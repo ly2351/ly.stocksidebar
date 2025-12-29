@@ -173,6 +173,17 @@
           "type": "array",
           "default": [],
           "description": "显示在状态栏的股票"
+        },
+        "ly-stocksidebar.enableAutoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用自动刷新定时器"
+        },
+        "ly-stocksidebar.refreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "description": "自动刷新间隔（毫秒），最小1000ms"
         }
       }
     }

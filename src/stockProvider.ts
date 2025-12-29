@@ -25,7 +25,7 @@ export class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'p
         treeItem.id = s.code;
         treeItem.contextValue = 'stock';
         treeItem.iconPath = s.percent >= 0 ? 'arrow-up' : 'arrow-down';
-        treeItem.tooltip = `**${s.name} (${s.code})**\n- 涨跌：${s.updown}\n- 涨幅：${s.percent}%\n- 最高：${s.high}\n- 最低：${s.low}\n- 成交额：${s.amount}\n- 更新时间：${s.time}`;
+        treeItem.tooltip = `「今日行情」 ${s.name}（${s.code}）\n涨跌：${s.updown}   百分：${s.percent}%\n最高：${s.high}   最低：${s.low}\n今开：${s.open}   昨收：${s.yestclose}\n成交额：${s.amount}\n更新时间：${s.time}`;
         if (this.statusBarStocks.some(sb => sb.code === s.code)) treeItem.contextValue = 'statusBarStock';
         return treeItem;
     }
