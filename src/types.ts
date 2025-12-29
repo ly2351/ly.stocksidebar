@@ -20,3 +20,24 @@ export interface StockIndexItem {
     codeLower: string;
     nameLower: string;
 }
+
+interface StockRef {
+    name: string;
+    symbol: string;
+    market: string;
+}
+
+export interface NewsItem {
+    id: number;
+    title: string;
+    summary: string;
+    impact: number;
+    route: string;
+    created_at: number;
+    stocks: StockRef[];
+    all_stocks: StockRef[];
+    subj_ids: number[];
+    bkj_infos?: any[];
+    // 可根据需要添加更多字段
+}
+

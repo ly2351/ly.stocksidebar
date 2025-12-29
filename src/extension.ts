@@ -1,9 +1,16 @@
 import * as vscode from "vscode";
 import { StockProvider } from "./stockProvider";
+import { fetchNews } from "./api";
 
 export function activate(context: vscode.ExtensionContext) {
     const stockProvider = new StockProvider();
     vscode.window.registerTreeDataProvider("stockView", stockProvider);
+
+    let maxId = 0; // 跟踪最大的新闻 ID
+
+    // 创建输出通道
+    const outputChannel = vscode.window.createOutputChannel('盯盘助手');
+    context.subscriptions.push(outputChannel);
 
     const commands: [string, (...args: any[]) => any][] = [
         ["ly-stocksidebar.refresh", () => stockProvider.refresh()],
@@ -21,12 +28,15 @@ export function activate(context: vscode.ExtensionContext) {
     commands.forEach(([name, cb]) => context.subscriptions.push(vscode.commands.registerCommand(name, cb)));
 
     let refreshInterval: NodeJS.Timeout | undefined;
+    let timeOutputInterval: NodeJS.Timeout | undefined;
 
     const getConfig = () => {
         const config = vscode.workspace.getConfiguration('ly-stocksidebar');
         return {
             enableAutoRefresh: config.get<boolean>('enableAutoRefresh', true),
-            refreshInterval: config.get<number>('refreshInterval', 5000)
+            refreshInterval: config.get<number>('refreshInterval', 5000),
+            enableOutputChannel: config.get<boolean>('enableOutputChannel', true),
+            outputInterval: config.get<number>('outputInterval', 20000)
         };
     };
 
@@ -41,7 +51,10 @@ export function activate(context: vscode.ExtensionContext) {
     const toggleRefreshInterval = () => {
         const { enableAutoRefresh, refreshInterval: interval } = getConfig();
         if (enableAutoRefresh && isMarketOpen() && !refreshInterval) {
-            refreshInterval = setInterval(() => stockProvider.refresh(), interval);
+            refreshInterval = setInterval(() => {
+                stockProvider.refresh();
+                outputChannel.appendLine(`[${new Date().toLocaleString()}] 股票数据已刷新`);
+            }, interval);
             console.log(`定时器已启用，每${interval}ms刷新一次股票数据。`);
         } else if ((!enableAutoRefresh || !isMarketOpen()) && refreshInterval) {
             clearInterval(refreshInterval);
@@ -50,17 +63,85 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
+    const toggleOutputInterval = () => {
+        const { enableOutputChannel, outputInterval: interval } = getConfig();
+        if (enableOutputChannel && !timeOutputInterval) {
+            timeOutputInterval = setInterval(async () => {
+                const news = await fetchNews();
+                let newMaxId = maxId;
+                const newNews = news.filter(msg => {
+                    if (msg.id > maxId) {
+                        newMaxId = Math.max(newMaxId, msg.id);
+                        return true;
+                    }
+                    return false;
+                });
+                maxId = newMaxId;
+
+                if (newNews.length > 0) {
+                    // 反转时间轴：按时间升序输出（最旧的先）
+                    newNews.reverse().forEach((msg) => {
+                        let impactStr = '';
+                        let bkjStr = '';
+                        let summaryStr = '';
+
+                        if (msg.impact !== 0) {
+                            impactStr = msg.impact === 1
+                                ? '【利多 🚀️ 】'
+                                : '【利空 🍜️ 】';
+                        }
+
+                        if (msg.summary) {
+                            summaryStr = `${msg.summary}\r\n`;
+                        }
+
+                        if (msg.bkj_infos?.length) {
+                            bkjStr =
+                                `相关板块：${msg.bkj_infos
+                                    .map(bkj => `[${bkj.name}]`)
+                                    .join(' - ')}\r\n`;
+                        }
+
+                        const timeStr = new Date(msg.created_at * 1000).toLocaleString();
+
+                        outputChannel.appendLine(
+                            `${msg.title} ${impactStr}\r\n` +
+                            `${summaryStr}` +
+                            `${bkjStr}` +
+                            `[XGB - ${timeStr}]\r\n` +
+                            '--------------------------------------------------'
+                        );
+                    });
+
+                    outputChannel.show(true);
+                }
+            }, interval);
+            console.log(`输出通道定时器已启用，每${interval}ms刷新一次新闻。`);
+        } else if (!enableOutputChannel && timeOutputInterval) {
+            clearInterval(timeOutputInterval);
+            timeOutputInterval = undefined;
+            console.log("输出通道定时器已禁用。");
+        }
+    };
+
+    context.subscriptions.push({ dispose: () => { if (timeOutputInterval) clearInterval(timeOutputInterval); } });
+
     toggleRefreshInterval();
     setInterval(toggleRefreshInterval, 60000);
+
+    toggleOutputInterval();
 
     // 监听配置变化
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
         if (e.affectsConfiguration('ly-stocksidebar.enableAutoRefresh') || e.affectsConfiguration('ly-stocksidebar.refreshInterval')) {
             toggleRefreshInterval();
         }
+        if (e.affectsConfiguration('ly-stocksidebar.enableOutputChannel') || e.affectsConfiguration('ly-stocksidebar.outputInterval')) {
+            toggleOutputInterval();
+        }
     }));
 
     console.log("股票监控插件已激活！");
 }
 
-export function deactivate() {}
+export function deactivate() { }

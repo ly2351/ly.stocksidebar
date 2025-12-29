@@ -184,6 +184,17 @@
           "default": 5000,
           "minimum": 1000,
           "description": "自动刷新间隔（毫秒），最小1000ms"
+        },
+        "ly-stocksidebar.enableOutputChannel": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用输出通道新闻监控"
+        },
+        "ly-stocksidebar.outputInterval": {
+          "type": "number",
+          "default": 20000,
+          "minimum": 5000,
+          "description": "输出通道刷新间隔（毫秒），最小5000ms"
         }
       }
     }

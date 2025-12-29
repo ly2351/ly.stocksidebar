@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Stock } from "./types";
+import { Stock, NewsItem } from "./types";
 
 export async function fetchStockDataByCode(code: string): Promise<Stock[]> {
     try {
@@ -44,4 +44,23 @@ function parseStockData(data: string): Stock[] {
             time: `${vals[30]} ${vals[31]}`
         } as Stock;
     }).filter((s): s is Stock => s !== null);
+}
+
+export async function fetchNews(): Promise<NewsItem[]> {
+    try {
+        const response = await axios.get('https://baoer-api.xuangubao.cn/api/v6/message/newsflash?limit=20&subj_ids=9,10,723,35,469&platform=pcweb', {
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Referer': 'https://xuangubao.cn/',
+                'Origin': 'https://xuangubao.cn'
+            }
+        });
+        const news = response.data.data?.messages || [];
+        console.log(`[API] 获取到 ${news.length} 条新闻数据`);
+        return news;
+    } catch (error) {
+        console.error('[API] 获取新闻数据失败:', error);
+        return [];
+    }
 }
