@@ -50,11 +50,13 @@
     "commands": [
       {
         "command": "ly-stocksidebar.refresh",
-        "title": "刷新股票数据"
+        "title": "刷新股票数据",
+        "icon": "$(refresh)"
       },
       {
         "command": "ly-stocksidebar.addStock",
-        "title": "添加股票"
+        "title": "添加股票",
+        "icon": "$(add)"
       },
       {
         "command": "ly-stocksidebar.deleteStock",
@@ -66,11 +68,13 @@
       },
       {
         "command": "ly-stocksidebar.parentRefresh",
-        "title": "刷新父项股票列表"
+        "title": "刷新父项股票列表",
+        "icon": "$(refresh)"
       },
       {
         "command": "ly-stocksidebar.parentAddStock",
-        "title": "在父项添加股票"
+        "title": "在父项添加股票",
+        "icon": "$(add)"
       },
       {
         "command": "ly-stocksidebar.moveUp",
@@ -90,17 +94,31 @@
       }
     ],
     "menus": {
-      "view/item/context": [
+      "view/title": [
+        {
+          "command": "ly-stocksidebar.addStock",
+          "when": "view == stockView",
+          "group": "navigation"
+        },
+        {
+          "command": "ly-stocksidebar.refresh",
+          "when": "view == stockView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/toolbar": [
         {
           "command": "ly-stocksidebar.parentRefresh",
           "when": "view == stockView && viewItem == stockParent",
-          "group": "navigation"
+          "group": "inline"
         },
         {
           "command": "ly-stocksidebar.parentAddStock",
           "when": "view == stockView && viewItem == stockParent",
-          "group": "navigation"
-        },
+          "group": "inline"
+        }
+      ],
+      "view/item/context": [
         {
           "command": "ly-stocksidebar.moveUp",
           "when": "view == stockView && viewItem != stockParent",
