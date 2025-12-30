@@ -4,6 +4,11 @@ All notable changes to the "stocksidebar" extension will be documented in this f
 
 ## [1.0.17] - 2025-12-30
 
+### 优化
+- CHANGELOG内容整理
+
+## [1.0.16] - 2025-12-30
+
 ### 修改
 - 优化股票百分比显示格式：现在显示为两位小数（如 +0.00% 或 -0.00%），提升显示精度和美观性。
 - 更换股票图标：上涨股票使用自定义 `meat.svg` 图标，下跌股票使用 `noodles.svg` 图标，增强视觉识别。
