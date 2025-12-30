@@ -2,7 +2,7 @@
   "name": "ly-stocksidebar",
   "displayName": "盯盘助手",
   "description": "股票监控插件、盯盘助手。这是一个 VS Code 插件，用于在侧边栏展示股票行情信息，并提供状态栏实时监控功能。",
-  "version": "1.0.1",
+  "version": "1.0.17",
   "publisher": "kudsu",
   "author": "千山慕雪",
   "engines": {
@@ -16,7 +16,10 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished",
+    "onView:stockView",
+    "onCommand:ly-stocksidebar.refresh",
+    "onCommand:ly-stocksidebar.addStock"
   ],
   "keywords": [
     "stock",
@@ -81,6 +84,16 @@
         "icon": "$(add)"
       },
       {
+        "command": "ly-stocksidebar.parentRefresh",
+        "title": "刷新父项股票列表",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ly-stocksidebar.parentAddStock",
+        "title": "在父项添加股票",
+        "icon": "$(add)"
+      },
+      {
         "command": "ly-stocksidebar.moveUp",
         "title": "上移股票"
       },
@@ -108,6 +121,18 @@
           "command": "ly-stocksidebar.refresh",
           "when": "view == stockView",
           "group": "navigation"
+        }
+      ],
+      "view/item/toolbar": [
+        {
+          "command": "ly-stocksidebar.parentRefresh",
+          "when": "view == stockView && viewItem == stockParent",
+          "group": "inline"
+        },
+        {
+          "command": "ly-stocksidebar.parentAddStock",
+          "when": "view == stockView && viewItem == stockParent",
+          "group": "inline"
         }
       ],
       "view/item/toolbar": [
@@ -150,7 +175,7 @@
         },
         {
           "command": "ly-stocksidebar.addToStatusBar",
-          "when": "view == stockView && viewItem!= stockParent",
+          "when": "view == stockView && viewItem != stockParent",
           "group": "navigation3"
         }
       ]
@@ -170,7 +195,7 @@
         },
         "ly-stocksidebar.stocks": {
           "type": "array",
-          "default": [],
+          "default": ["sz300059"],
           "description": "自选股票代码列表"
         },
         "ly-stocksidebar.statusBarStock": {
@@ -223,7 +248,6 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "axios": "^1.7.9",
     "iconv-lite": "^0.6.3"
   },
   "license": "MIT"

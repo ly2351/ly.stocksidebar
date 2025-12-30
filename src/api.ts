@@ -1,21 +1,23 @@
-import axios from "axios";
+import * as iconv from 'iconv-lite';
 import { Stock, NewsItem } from "./types";
 
 export async function fetchStockDataByCode(code: string): Promise<Stock[]> {
     try {
-        const response = await axios.get(`https://hq.sinajs.cn/list=${code}`, {
+        const response = await fetch(`https://hq.sinajs.cn/list=${code}`, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
                 'Connection': 'keep-alive',
                 'Referer': 'https://finance.sina.com.cn/'
-            },
-            responseType: 'arraybuffer'
+            }
         });
 
-        const decoder = new TextDecoder('gb18030');
-        const data = decoder.decode(new Uint8Array(response.data));
+        if (!response.ok) return [];
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const data = iconv.decode(buffer, 'gb18030');
         return parseStockData(data);
     } catch (error) {
         return [];
@@ -48,7 +50,7 @@ function parseStockData(data: string): Stock[] {
 
 export async function fetchNews(): Promise<NewsItem[]> {
     try {
-        const response = await axios.get('https://baoer-api.xuangubao.cn/api/v6/message/newsflash?limit=20&subj_ids=9,10,723,35,469&platform=pcweb', {
+        const response = await fetch('https://baoer-api.xuangubao.cn/api/v6/message/newsflash?limit=20&subj_ids=9,10,723,35,469&platform=pcweb', {
             headers: {
                 'Accept': 'application/json, text/plain, */*',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -56,7 +58,11 @@ export async function fetchNews(): Promise<NewsItem[]> {
                 'Origin': 'https://xuangubao.cn'
             }
         });
-        const news = response.data.data?.messages || [];
+
+        if (!response.ok) return [];
+
+        const data = await response.json() as { data: { messages: NewsItem[] } };
+        const news = data.data?.messages || [];
         console.log(`[API] 获取到 ${news.length} 条新闻数据`);
         return news;
     } catch (error) {

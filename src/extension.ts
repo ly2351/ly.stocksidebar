@@ -2,14 +2,15 @@ import * as vscode from "vscode";
 import { StockProvider } from "./stockProvider";
 import { fetchNews } from "./api";
 
-export function activate(context: vscode.ExtensionContext) {
-    const stockProvider = new StockProvider();
+export async function activate(context: vscode.ExtensionContext) {
+    const stockProvider = new StockProvider(context);
+    await stockProvider.refresh();
     vscode.window.registerTreeDataProvider("stockView", stockProvider);
 
     let maxId = 0; // 跟踪最大的新闻 ID
 
     // 创建输出通道
-    const outputChannel = vscode.window.createOutputChannel('盯盘助手');
+    const outputChannel = vscode.window.createOutputChannel('淘金助手');
     context.subscriptions.push(outputChannel);
 
     const commands: [string, (...args: any[]) => any][] = [
@@ -53,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (enableAutoRefresh && isMarketOpen() && !refreshInterval) {
             refreshInterval = setInterval(() => {
                 stockProvider.refresh();
-                outputChannel.appendLine(`[${new Date().toLocaleString()}] 股票数据已刷新`);
+                // outputChannel.appendLine(`[${new Date().toLocaleString()}] 股票数据已刷新`);
             }, interval);
             console.log(`定时器已启用，每${interval}ms刷新一次股票数据。`);
         } else if ((!enableAutoRefresh || !isMarketOpen()) && refreshInterval) {

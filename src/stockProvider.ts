@@ -12,7 +12,7 @@ export class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'p
     private statusBarStocks: Stock[] = [];
     private statusBarItems: Map<string, vscode.StatusBarItem> = new Map();
 
-    constructor() { this.loadStocks(); }
+    constructor(private context: vscode.ExtensionContext) { }
 
     getTreeItem(element: Stock | { type: 'parent' }): vscode.TreeItem {
         if ("type" in element && element.type === 'parent') {
@@ -21,21 +21,20 @@ export class StockProvider implements vscode.TreeDataProvider<Stock | { type: 'p
             return treeItem;
         }
         const s = element as Stock;
-        const treeItem = new vscode.TreeItem(`${s.percent >= 0 ? '+' + s.percent : s.percent}%  ${s.cur}  ${s.name}`);
+        //🍗🍜
+        const percentStr = `${s.percent >= 0 ? '  +' : '  -'}${Math.abs(s.percent).toFixed(2)}%`;
+        const treeItem = new vscode.TreeItem(`${percentStr}     ${s.cur}         [${s.name} ]`);
         treeItem.id = s.code;
         treeItem.contextValue = 'stock';
-        treeItem.iconPath = s.percent >= 0 ? 'arrow-up' : 'arrow-down';
+        treeItem.iconPath = s.percent >= 0 ? vscode.Uri.file(path.join(this.context.extensionPath, 'resources', 'meat2.svg')) : vscode.Uri.file(path.join(this.context.extensionPath, 'resources', 'noodles.svg'));
         treeItem.tooltip = `「今日行情」 ${s.name}（${s.code}）\n涨跌：${s.updown}   百分：${s.percent}%\n最高：${s.high}   最低：${s.low}\n今开：${s.open}   昨收：${s.yestclose}\n成交额：${s.amount}\n更新时间：${s.time}`;
         if (this.statusBarStocks.some(sb => sb.code === s.code)) treeItem.contextValue = 'statusBarStock';
         return treeItem;
     }
 
-    getChildren(element?: Stock | { type: 'parent' }): Stock[] | Thenable<Stock[]> {
+    getChildren(element?: Stock | { type: 'parent' }): Stock[] {
         if (!element) return [{ type: 'parent' }] as any;
         if ("type" in element && element.type === 'parent') {
-            if (this.stocks.length === 0) {
-                return this.loadStocks().then(() => this.stocks);
-            }
             return this.stocks;
         }
         return [];
